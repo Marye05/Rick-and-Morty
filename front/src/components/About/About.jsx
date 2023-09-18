@@ -1,20 +1,14 @@
 import React from "react";
+import style from "./About.module.css";
 
-
-class About extends React.Component{
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        return(
-            <>
-            <h1>Mi nombre es Maryeris Orozco</h1>
-            
-            </>
-
-        );
-    }
+const About = () => {
+    return(
+        <div className={style.container}>
+            <h1>Work in progress...</h1>
+            <p>Maryeris Orozco</p>
+        </div>
+    )
 }
+
 
 export default About;

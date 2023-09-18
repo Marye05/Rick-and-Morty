@@ -1,25 +1,29 @@
-require("dotenv").config()
 const express = require("express");
-const router = require("./routes");
+const router = require("./routes/index");
 const morgan = require("morgan");
 const cors = require("cors");
 
-// esto es una buena practica preparar el servidor para nuestro puerto, 
-// cuando hagamos el despliegue el host va a generar un numero de puerto en nuestras
-// variables de entorno que estan en el archivo .env cuando este desplegado 
-// si no esta desplegado debemos colocar el puerto a mano
-// el q proveera la variable de entorno sino es 3001
-const PORT = process.env.PORT || 3001;
-
-
 const server = express();
+
 server.use(express.json());
-// lo transforma a un objeto de javascript
 server.use(morgan("dev"));
 server.use(cors());
 
-server.use("/", router);
+// eso se usa para dar el permiso de utilizar las rutas
+server.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header(
+       'Access-Control-Allow-Headers',
+       'Origin, X-Requested-With, Content-Type, Accept'
+    );
+    res.header(
+       'Access-Control-Allow-Methods',
+       'GET, POST, OPTIONS, PUT, DELETE'
+    );
+    next();
+ });
 
-server.listen(PORT, () =>{
-    console.log(`Listening on port ${PORT}`);
-});
+ server.use("/rickandmorty", router);
+
+module.exports = server;

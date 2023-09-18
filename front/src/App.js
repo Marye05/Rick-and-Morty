@@ -1,76 +1,81 @@
-import Cards from "./components/Cards/Cards.jsx";
-import Nav from "./components/Nav/Nav.jsx";
-import { useEffect, useState } from "react";
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import About from "./components/About/About.jsx";
-import Detail from "./components/Detail/Detail.jsx";
-import style from "./App.module.css"
-import Form from "./components/Form/Form.jsx"
-import Favorites from "./components/Favorites/Favorites.jsx";
+import Cards from './components/Cards/Cards.jsx';
+import Nav from './components/Nav/Nav';
+import About from './components/About/About';
+import Detail from './components/Detail/Detail';
+import Form from "./components/Form/Form";
+import Favorites from "./components/Favorites/Favorites";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
+// const URL_BASE = 'https://be-a-rym.up.railway.app/api/character';
+// const API_KEY = '545e61f7d756.e8fdf4afb83939842464 ';
+
+// const username = 'marye05@gmail.com';
+// const password = 'holapass123';
+const URL = 'http://localhost:3001/rickandmorty/login';
 
 function App() {
-  const [characters, setCharacters] = useState([]);
-  const {pathname} = useLocation();
-  const [access, setAccess] = useState(false);
-  const navigate = useNavigate();
+   const location = useLocation();
+   const navigate = useNavigate();
+   const [characters, setCharacters] = useState([]);
+   const [access, setAccess] = useState(false);
 
-  useEffect(()=>{
-    !access && navigate("/");
-  },[access]);
+   const login = async (userData) => {
+      try {
+         const { username, password } = userData;
+         const { data } = await axios(URL + `?username=${username}&password=${password}`)
+         const { access } = data;
 
-  const username = "marye05@gmail.com";
-  const password = "holapass123";
+         setAccess(access);
+         access && navigate('/home');
 
-  const onSearch = (id) => {
-    const URL_BASE = "http://localhost:3001";
-    /// const KEY = "545e61f7d756.e8fdf4afb83939842464";
-
-    if (characters.find((char) => char.id === id)) {
-      return alert("Personaje repetido");
-    }
-
-    fetch(`${URL_BASE}/onsearch/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.name) {
-          setCharacters((oldChars) => [...oldChars, data]);
-        } else {
-          alert("Algo salió mal");
-        }
-      });
-  };
-
-  const onClose = (id) => {
-    setCharacters(characters.filter((char) => char.id !== id));
-  };
-
-    const login = (userData) => {
-      if(userData.username === username && userData.password === password){
-        setAccess(true);
-        navigate("/home");
-      } else {
-        alert("Credenciales incorrectas");
+      } catch (error) {
+         console.log(error.message);
       }
-    }
-  return (
-    <div className={style.App}>
-      <div className={style.Nav}>
-      {pathname !== "/" && <Nav onSearch={onSearch} />}
-  </div>
-      <Routes>
-        <Route path="/" element={<Form login={login} />} />
-        <Route
-          path="/home"
-          element={<Cards characters={characters} onClose={onClose} />}
-        />
-        <Route path="/about" element={<About />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/detail/:detailId" element={<Detail />} />
-      </Routes>
-    </div>
-    
-  );
+   }
+
+   useEffect(() => {
+      !access && navigate('/')
+   }, [access, navigate])
+
+   const onSearch = async (id) => {
+      try {
+         const { data } = await axios(`http://localhost:3001/rickandmorty/character/${id}`);
+         
+         if(data.name) {
+            setCharacters((oldChars) => [...oldChars, data]);
+         };
+
+      } catch (error) {
+         alert('¡No hay personajes con este ID!');
+      }
+   };
+
+   const onClose = (id) => {
+      const charactersFiltered = characters.filter(character => character.id !== id)
+      setCharacters(charactersFiltered)
+   }
+
+   return (
+      <div className='App'>
+         {
+            location.pathname !== '/' && <Nav onSearch={onSearch} setAccess={setAccess} />
+         }
+         
+         <Routes>
+            <Route path='/' element={<Form login={login}/>} />
+            <Route path='/home' element={ <Cards characters={characters} onClose={onClose}/> }/>
+            <Route path='/about' element={<About/>} />
+            <Route path='/detail/:id' element={<Detail/>} />
+            <Route path='/favorites' element={<Favorites/>} />
+         </Routes>
+        
+      </div>
+   );
 }
 
 export default App;
+
+
+ 

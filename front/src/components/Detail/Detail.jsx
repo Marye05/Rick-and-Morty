@@ -1,39 +1,58 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import style from "./Detail.module.css";
+import axios from 'axios';
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+// const URL_BASE = 'https://be-a-rym.up.railway.app/api/character';
+// const API_KEY = '545e61f7d756.e8fdf4afb83939842464 ';
 
 const Detail = () => {
-    const {detailId} = useParams();
+  const { id } = useParams();
+  const [character, setCharacter] = useState({});
 
-    const [character, setCharacter] = useState({});
+  useEffect(() => {
+    axios(`http://localhost:3001/rickandmorty/character/${id}`)
+    .then(response => response.data)
+    .then((data) => {
+        if (data.name) {
+          setCharacter(data);
+        } else {
+          window.alert('No hay personajes con ese ID');
+        }
+    });
+    return setCharacter({});
+  }, [id]);
 
-    useEffect(() =>{
-        const URL_BASE = "http://localhost:3001/rickandmorty";
-    
-        axios(`${URL_BASE}/detail/${detailId}`)
-        .then((response)=> setCharacter(response.data))
-
-    }, []);
-
-    return(
-        
+  return(
+    <div className={style.container} >
+      {character.name ? (<div>
         <div>
-            {character.name ? (
-            <>
-            <h2>{character.name}</h2>
-            <p>{character.status}</p>
-            <p>{character.species}</p>
-            <p>{character.gender}</p>
-            <p>{character.origin?.name}</p>
-            <img src={character.image} alt="img" />
-            </>
-            ) : (
-                <h3>Loading...</h3>
-            )}
+          <button>
+            <Link to='/home' className={style.link} >Home</Link>
+          </button>
+          <h1>{character?.name}</h1>
         </div>
-    );
-};
 
+        <div className={style.detail} >
+          <div className={style.containerImg} >
+            <img src={character?.image} alt={character?.name} />
+          </div>
 
+          <div>
+            <label htmlFor="status">Status: </label>
+            <p>{character?.status}</p>
+            <label htmlFor="specie">Specie: </label>
+            <p>{character?.species}</p>
+            <label htmlFor="gender">Gender: </label>
+            <p>{character?.gender}</p>
+            <label htmlFor="origin">Origin: </label>
+            <p>{character?.origin?.name}</p>
+          </div>
+        </div>
+      </div>) 
+      : (<h1>Cargando...</h1>)}
+    </div>
+  )
+}
 
 export default Detail;
